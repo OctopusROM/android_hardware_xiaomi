@@ -77,3 +77,12 @@ prop {
     access: ReadWrite
     api_name: "control_illumination"
 }
+
+# single vendor acquired code to forward (default: -1, keep all vendor codes filtered)
+prop {
+    prop_name: "persist.vendor.fingerprint.udfps.vendor_acquired_code"
+    type: Integer
+    scope: Internal
+    access: ReadWrite
+    api_name: "vendor_acquired_code"
+}

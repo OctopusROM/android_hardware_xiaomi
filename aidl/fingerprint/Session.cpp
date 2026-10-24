@@ -22,12 +22,14 @@ void onClientDeath(void* cookie) {
 }
 
 Session::Session(fingerprint_device_t* device, UdfpsHandler* udfpsHandler, int userId,
-                 std::shared_ptr<ISessionCallback> cb, LockoutTracker lockoutTracker)
+                 std::shared_ptr<ISessionCallback> cb, LockoutTracker lockoutTracker,
+                 int32_t vendorAcquiredCode)
     : mDevice(device),
       mLockoutTracker(lockoutTracker),
       mUserId(userId),
       mCb(cb),
-      mUdfpsHandler(udfpsHandler) {
+      mUdfpsHandler(udfpsHandler),
+      mVendorAcquiredCode(vendorAcquiredCode) {
     mDeathRecipient = AIBinder_DeathRecipient_new(onClientDeath);
 
     auto path = std::format("/data/vendor_de/{}/fpdata/", userId);
@@ -377,10 +379,9 @@ void Session::notify(const fingerprint_msg_t* msg) {
             if (mUdfpsHandler) {
                 mUdfpsHandler->onAcquired(static_cast<int32_t>(result), vendorCode);
             }
-            // don't process vendor messages further since frameworks try to disable
-            // udfps display mode on vendor acquired messages but our sensors send a
-            // vendor message during processing...
-            if (result != AcquiredInfo::VENDOR) {
+            // Keep processing messages from disabling UDFPS display mode. Only the
+            // device-configured press event may reach the framework.
+            if (result != AcquiredInfo::VENDOR || vendorCode == mVendorAcquiredCode) {
                 mCb->onAcquired(result, vendorCode);
             }
         } break;

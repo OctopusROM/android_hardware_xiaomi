@@ -33,7 +33,8 @@ void onClientDeath(void* cookie);
 class Session : public BnSession {
   public:
     Session(fingerprint_device_t* device, UdfpsHandler* udfpsHandler, int userId,
-            std::shared_ptr<ISessionCallback> cb, LockoutTracker lockoutTracker);
+            std::shared_ptr<ISessionCallback> cb, LockoutTracker lockoutTracker,
+            int32_t vendorAcquiredCode);
     ndk::ScopedAStatus generateChallenge() override;
     ndk::ScopedAStatus revokeChallenge(int64_t challenge) override;
     ndk::ScopedAStatus enroll(const HardwareAuthToken& hat,
@@ -99,6 +100,7 @@ class Session : public BnSession {
     AIBinder_DeathRecipient* mDeathRecipient;
 
     UdfpsHandler* mUdfpsHandler;
+    const int32_t mVendorAcquiredCode;
 };
 
 }  // namespace aidl::android::hardware::biometrics::fingerprint
