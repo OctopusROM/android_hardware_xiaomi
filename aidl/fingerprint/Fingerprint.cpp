@@ -244,7 +244,9 @@ ndk::ScopedAStatus Fingerprint::createSession(int32_t /*sensorId*/, int32_t user
                                               std::shared_ptr<ISession>* out) {
     CHECK(mSession == nullptr || mSession->isClosed()) << "Open session already exists!";
 
-    mSession = SharedRefBase::make<Session>(mDevice, mUdfpsHandler, userId, cb, mLockoutTracker);
+    mSession = SharedRefBase::make<Session>(
+            mDevice, mUdfpsHandler, userId, cb, mLockoutTracker,
+            mConfig->get<int32_t>("vendor_acquired_code"));
     *out = mSession;
 
     mSession->linkToDeath(cb->asBinder().get());
